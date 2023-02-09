@@ -6,6 +6,7 @@ using webapinews.Entities;
 using webapinews.ExceptionHandler;
 using Microsoft.EntityFrameworkCore;
 using webapinews.Helpers;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace webapinews.Services
 {
@@ -47,6 +48,21 @@ namespace webapinews.Services
         {
             var model = _context.Users.AsQueryable();
             var result = PaginatedList<User>.Create(model, ownerStringParameter);
+            if (!string.IsNullOrEmpty(ownerStringParameter.search))
+            {
+                model = model.Where(hh => hh.UserName.Contains(ownerStringParameter.search));
+            }
+            if (!string.IsNullOrEmpty(ownerStringParameter.SortBy))
+            {
+                switch (ownerStringParameter.SortBy)
+                {
+                    case "user_desc": model = model.OrderByDescending(hh => hh.UserName); break;
+                    case "Id_asc": model = model.OrderBy(hh => hh.Id); break;
+                    case "Id_desc": model = model.OrderByDescending(hh => hh.Id); break;
+                    case "email_asc": model = model.OrderBy(hh => hh.Email); break;
+                    case "email_desc": model = model.OrderByDescending(hh => hh.Email); break;
+                }
+            }
             return result;
         }
         public User GetById(int id)

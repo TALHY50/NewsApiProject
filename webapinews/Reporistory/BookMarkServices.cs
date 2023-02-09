@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using static webapinews.Reporistory.BookMarkServices;
 using webapinews.Entities;
 using webapinews.Helpers;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace webapinews.Reporistory
 {
@@ -42,6 +43,10 @@ namespace webapinews.Reporistory
         public PaginatedList<News> Get(OwnerStringParameter ownerStringParameter)
         {
             var qurey = _context.News.AsQueryable();
+            if (!string.IsNullOrEmpty(ownerStringParameter.search))
+            {
+                qurey = qurey.Where(hh => hh.Title.Contains(ownerStringParameter.search));
+            }
             var result = PaginatedList<News>.Create(qurey, ownerStringParameter);
             return result;
         }
@@ -98,10 +103,10 @@ namespace webapinews.Reporistory
             var user = _context.BookMarks.Include(e => e.User)
             .Include(e => e.News).
             Where(e => e.UserId == id).AsQueryable();
-            
             var mappedData = user.Select(e => new BookMarksViewModel
             {
                 UserId = e.UserId,
+                userName = e.User.UserName,
                 Email = e.User.Email,
                 NewsId = e.NewsId,
                 Aurthor = e.News.Aurthor,
@@ -110,7 +115,12 @@ namespace webapinews.Reporistory
                 CreationDate = e.News.CreationDate,
                 IsBookMark = e.IsBookMark
             });
-            return  PaginatedList<BookMarksViewModel>.Create(mappedData, ownerStringParameter);
+            if (!string.IsNullOrEmpty(ownerStringParameter.search))
+            {
+                mappedData = mappedData.Where(hh => hh.userName.Contains(ownerStringParameter.search));
+            }
+            var result = PaginatedList<BookMarksViewModel>.Create(mappedData, ownerStringParameter);
+            return result;
             
         }
 

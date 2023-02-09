@@ -46,6 +46,7 @@ namespace webapinews.Controllers
             var model = _newsService.Get(ownerStringParameter);
             var metadata = new
             {
+               
                 model.TotalCount,
                 model.PageSize,
                 model.CurrentPage,

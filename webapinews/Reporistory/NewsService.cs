@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Drawing.Printing;
+using System.Globalization;
 using webapinews.Entities;
 using webapinews.Helpers;
 using webapinews.Interface;
@@ -26,7 +27,24 @@ namespace webapinews.Reporistory
         public PaginatedList<News> Get(OwnerStringParameter ownerStringParameter)
         {
             var qurey = _context.News.AsQueryable();
-            var result =  PaginatedList<News>.Create(qurey, ownerStringParameter);
+            if (!string.IsNullOrEmpty(ownerStringParameter.search))
+            {
+                qurey = qurey.Where(hh => hh.Title.Contains(ownerStringParameter.search));
+            }
+            qurey = qurey.OrderBy(hh => hh.Aurthor);
+            if (!string.IsNullOrEmpty(ownerStringParameter.SortBy))
+            {
+                switch (ownerStringParameter.SortBy)
+                {
+                    case "title_desc": qurey = qurey.OrderByDescending(hh => hh.Title); break;
+                    case "aurthor_asc": qurey = qurey.OrderBy(hh => hh.Aurthor); break;
+                    case "aurthor_desc": qurey = qurey.OrderByDescending(hh => hh.Aurthor); break;
+                    case "date_asc": qurey = qurey.OrderBy(hh => hh.CreationDate); break;
+                    case "date_desc": qurey = qurey.OrderByDescending(hh => hh.CreationDate); break;
+                }
+            }
+
+            var result = PaginatedList<News>.Create(qurey, ownerStringParameter);
             return result;
         }
         public News Add(News news)

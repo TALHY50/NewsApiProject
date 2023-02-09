@@ -7,13 +7,17 @@ namespace webapinews.Helpers
     {
         public int CurrentPage { get; private set; }
         public int PageSize { get; private set; }
+        public string Search { get; private set; }
+        public string SortBy {get; private set; }
         public int TotalPages { get; private set; }
         public int TotalCount { get; private set; }
         public bool HasPreviousPage { get { return (CurrentPage > 1); } }
         public bool HasNextPage { get { return (CurrentPage < TotalPages); } }
 
-        public PaginatedList(List<T> items, int count, int pageIndex, int pageSize)
+        public PaginatedList(List<T> items, int count, int pageIndex, int pageSize, string search,string sortby)
         {
+            SortBy = sortby;
+            Search = search;
             CurrentPage = pageIndex;
             PageSize = pageSize;
             TotalCount = count;
@@ -27,7 +31,13 @@ namespace webapinews.Helpers
             var count = source.Count();
             var items = source.Skip((ownerStringParameter.PageNumber - 1) 
                 * ownerStringParameter.PageSize).Take(ownerStringParameter.PageSize).ToList();
-            return new PaginatedList<T>(items, count, ownerStringParameter.PageNumber,ownerStringParameter.PageSize);
+            return new PaginatedList<T>
+                (items, 
+                 count,
+                ownerStringParameter.PageNumber,
+                ownerStringParameter.PageSize, 
+                ownerStringParameter.search, 
+                ownerStringParameter.SortBy);
         }
     }
 

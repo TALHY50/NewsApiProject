@@ -75,6 +75,7 @@ namespace webapinews.Controllers
             var model = _bookMark.GetBookMarkedById(currentUser.Id, ownerStringParameter);
             var metadata = new
             {
+                model.Search,
                 model.TotalCount,
                 model.PageSize,
                 model.CurrentPage,
