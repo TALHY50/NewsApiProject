@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using System.Drawing.Printing;
 using webapinews.Entities;
+using webapinews.Helpers;
 using webapinews.Interface;
 using webapinews.Models;
 using webapinews.Services;
@@ -10,7 +13,7 @@ using AuthorizeAttribute = webapinews.Services.AuthorizeAttribute;
 
 namespace webapinews.Controllers
 {
-    [AllowAnonymous]
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class NewsController : ControllerBase
@@ -21,17 +24,39 @@ namespace webapinews.Controllers
         {
             _newsService = newsService;
         }
-        [Authorize(Role.Admin, Role.User)]
-        [HttpGet]
+        [AllowAnonymous]
+        [HttpGet("[action]")]
         public async Task<ActionResult<IEnumerable<News>>> Get()
+        {
+            if (_newsService == null)
+            {
+                return NotFound("Not Found");
+
+            }
+            return  _newsService.GetAll().ToList();
+        }
+        [AllowAnonymous]
+        [HttpGet]
+        public async Task<ActionResult<PaginatedList<News>>> Get([FromQuery] OwnerStringParameter ownerStringParameter)
         {
             if (_newsService == null)
             {
                 return NotFound("No Data found");
             }
-            var news =  _newsService.GetAll();
-            return Ok(news);
+            var model = _newsService.Get(ownerStringParameter);
+            var metadata = new
+            {
+                model.TotalCount,
+                model.PageSize,
+                model.CurrentPage,
+                model.TotalPages,
+                model.HasNextPage,
+                model.HasPreviousPage
+            };
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+            return Ok(model);
         }
+
         [Authorize(Role.Admin, Role.User)]
         [HttpGet("{id}")]
         public IActionResult GetById(int id)

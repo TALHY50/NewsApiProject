@@ -18,3 +18,4 @@ public partial class User
 
     public virtual ICollection<BookMark> BookMarks { get; } = new List<BookMark>();
 }
+

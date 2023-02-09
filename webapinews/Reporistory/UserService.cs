@@ -4,6 +4,8 @@ using BCrypt.Net;
 using webapinews.Interface;
 using webapinews.Entities;
 using webapinews.ExceptionHandler;
+using Microsoft.EntityFrameworkCore;
+using webapinews.Helpers;
 
 namespace webapinews.Services
 {
@@ -36,12 +38,17 @@ namespace webapinews.Services
             
         }
 
-        public IEnumerable<User> GetAll()
+        public List<User> GetAll()
         {
-            return _context.Users;
-            
+            var user = _context.Users;
+            return user.ToList();
+        }       
+        public PaginatedList<User> Get(OwnerStringParameter ownerStringParameter)
+        {
+            var model = _context.Users.AsQueryable();
+            var result = PaginatedList<User>.Create(model, ownerStringParameter);
+            return result;
         }
-
         public User GetById(int id)
         {
             var user = _context.Users.Find(id);

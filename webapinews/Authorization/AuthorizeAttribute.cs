@@ -10,6 +10,7 @@ namespace webapinews.Services
     public class AuthorizeAttribute : Attribute, IAuthorizationFilter
     {
         private readonly IList<Role> _roles;
+       
 
         public AuthorizeAttribute(params Role[] roles)
         {
@@ -20,7 +21,7 @@ namespace webapinews.Services
             var allowAnonymous = context.ActionDescriptor.EndpointMetadata.OfType<AllowAnonymousAttribute>().Any();
             if (allowAnonymous)
                 return;
-            var user = (User)context.HttpContext.Items["User"];
+            var user = context.HttpContext.Items["User"] as User;
             if (user == null || (_roles.Any() && !_roles.Contains(user.Role)))
             {
                 // not logged in or role not authorized

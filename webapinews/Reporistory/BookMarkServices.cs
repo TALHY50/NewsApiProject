@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.OpenApi;
 using Microsoft.AspNetCore.Http.HttpResults;
 using static webapinews.Reporistory.BookMarkServices;
 using webapinews.Entities;
+using webapinews.Helpers;
 
 namespace webapinews.Reporistory
 {
@@ -38,6 +39,12 @@ namespace webapinews.Reporistory
         {
            return _context.News;
         }
+        public PaginatedList<News> Get(OwnerStringParameter ownerStringParameter)
+        {
+            var qurey = _context.News.AsQueryable();
+            var result = PaginatedList<News>.Create(qurey, ownerStringParameter);
+            return result;
+        }
         public List<BookMark> BookMarkNews(int newsId, int userId)
         {
             var existingBookmark = _context.BookMarks.FirstOrDefault(b => b.NewsId == newsId && b.UserId == userId);
@@ -64,29 +71,6 @@ namespace webapinews.Reporistory
 
             return _context.BookMarks.Where(b => b.UserId == userId).ToList();
         }
-    
-
-    //public  List<BookMark> BookMarkNews(int newsId, int userId)
-    //{
-    //    var existingBookmark = _context.BookMarks.FirstOrDefault(b => b.NewsId == newsId && b.UserId == userId);
-    //        if (existingBookmark == null)
-    //        {
-    //            return null;
-    //        }
-            
-    //            BookMark newBookmark = new BookMark
-    //            {
-    //                NewsId = newsId,
-    //                UserId = userId,
-    //                CreationDate = DateTime.Now,
-    //                IsBookMark = true
-    //            };
-
-    //            _context.BookMarks.Add(newBookmark);
-    //            _context.SaveChanges();
-            
-    //    return _context.BookMarks.Where(b => b.User.Id == userId).ToList();
-    //}
 
         public List<BookMarksViewModel> GetById(int id)
         {
@@ -107,6 +91,27 @@ namespace webapinews.Reporistory
                  IsBookMark =e.IsBookMark
             });
             return mappedData.ToList();
+        }
+        public PaginatedList<BookMarksViewModel> GetBookMarkedById(int id, OwnerStringParameter ownerStringParameter)
+        {
+
+            var user = _context.BookMarks.Include(e => e.User)
+            .Include(e => e.News).
+            Where(e => e.UserId == id).AsQueryable();
+            
+            var mappedData = user.Select(e => new BookMarksViewModel
+            {
+                UserId = e.UserId,
+                Email = e.User.Email,
+                NewsId = e.NewsId,
+                Aurthor = e.News.Aurthor,
+                Title = e.News.Title,
+                Content = e.News.Content,
+                CreationDate = e.News.CreationDate,
+                IsBookMark = e.IsBookMark
+            });
+            return  PaginatedList<BookMarksViewModel>.Create(mappedData, ownerStringParameter);
+            
         }
 
         public bool Update(int id, BookMark bookMark)

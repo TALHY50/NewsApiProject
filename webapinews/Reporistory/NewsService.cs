@@ -1,4 +1,8 @@
-﻿using webapinews.Interface;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Drawing.Printing;
+using webapinews.Entities;
+using webapinews.Helpers;
+using webapinews.Interface;
 using webapinews.Models;
 
 namespace webapinews.Reporistory
@@ -12,6 +16,18 @@ namespace webapinews.Reporistory
         {
             _context = context;
             
+        }
+        public IEnumerable<News> GetAll()
+
+        {
+            var news = _context.News;
+            return news;
+        }
+        public PaginatedList<News> Get(OwnerStringParameter ownerStringParameter)
+        {
+            var qurey = _context.News.AsQueryable();
+            var result =  PaginatedList<News>.Create(qurey, ownerStringParameter);
+            return result;
         }
         public News Add(News news)
         {
@@ -38,13 +54,7 @@ namespace webapinews.Reporistory
             var news = _context.News.Find(id);
             if (news == null) throw new KeyNotFoundException("News not found");
             return news;
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<News> GetAll()
-        {
-            return _context.News;
-            throw new NotImplementedException();
+           
         }
 
         public bool Update(int id ,News news)
@@ -63,12 +73,6 @@ namespace webapinews.Reporistory
             _context.SaveChanges();
             return true;
         }
-
-        private News GetNews(int id)
-        {
-            var news = _context.News.Find(id);
-            if (news == null) throw new KeyNotFoundException("News not found");
-            return news;
-        }
+        
     }
 }
