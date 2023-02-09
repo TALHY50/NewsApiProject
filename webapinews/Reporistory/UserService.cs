@@ -47,7 +47,6 @@ namespace webapinews.Services
         public PaginatedList<User> Get(OwnerStringParameter ownerStringParameter)
         {
             var model = _context.Users.AsQueryable();
-            var result = PaginatedList<User>.Create(model, ownerStringParameter);
             if (!string.IsNullOrEmpty(ownerStringParameter.search))
             {
                 model = model.Where(hh => hh.UserName.Contains(ownerStringParameter.search));
@@ -63,6 +62,7 @@ namespace webapinews.Services
                     case "email_desc": model = model.OrderByDescending(hh => hh.Email); break;
                 }
             }
+            var result = PaginatedList<User>.Create(model, ownerStringParameter);
             return result;
         }
         public User GetById(int id)

@@ -7,6 +7,7 @@ using static webapinews.Reporistory.BookMarkServices;
 using webapinews.Entities;
 using webapinews.Helpers;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace webapinews.Reporistory
 {
@@ -118,6 +119,17 @@ namespace webapinews.Reporistory
             if (!string.IsNullOrEmpty(ownerStringParameter.search))
             {
                 mappedData = mappedData.Where(hh => hh.userName.Contains(ownerStringParameter.search));
+            }
+            if (!string.IsNullOrEmpty(ownerStringParameter.SortBy))
+            {
+                switch (ownerStringParameter.SortBy)
+                {
+                    case "user_desc": mappedData = mappedData.OrderByDescending(hh => hh.userName); break;
+                    case "Id_asc": mappedData = mappedData.OrderBy(hh => hh.NewsId); break;
+                    case "Id_desc": mappedData = mappedData.OrderByDescending(hh => hh.NewsId); break;
+                    case "email_asc": mappedData = mappedData.OrderBy(hh => hh.Email); break;
+                    case "email_desc": mappedData = mappedData.OrderByDescending(hh => hh.Email); break;
+                }
             }
             var result = PaginatedList<BookMarksViewModel>.Create(mappedData, ownerStringParameter);
             return result;
