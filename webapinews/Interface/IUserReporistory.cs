@@ -5,7 +5,7 @@ using webapinews.Reporistory;
 
 namespace webapinews.Interface
 {
-    public interface IUserService 
+    public interface IUserReporistory 
     {
         UserDataResponse Authenticate(UserDataRequest model);
         List<User> GetAll();

@@ -1,4 +1,4 @@
-﻿namespace webapinews.Models
+﻿namespace webapinews.Entities
 {
     public class AppSettings
     {

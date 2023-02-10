@@ -5,6 +5,7 @@ using webapinews.Helpers;
 using webapinews.Interface;
 using webapinews.Models;
 using webapinews.Reporistory;
+using webapinews.Services;
 using AuthorizeAttribute = webapinews.Services.AuthorizeAttribute;
 
 
@@ -15,11 +16,14 @@ namespace webapinews.Controllers
     [ApiController]
     public class BookMarkController : ControllerBase
     {
-        private readonly IBookMark _bookMark;
+        private readonly IBookMarkReporistory _bookMark;
+        private IIdentityService _identityService;
 
-        public BookMarkController(IBookMark bookMark) {
+        public BookMarkController(IBookMarkReporistory bookMark,IIdentityService identityService) 
+        
+        {
             _bookMark = bookMark;
-
+            _identityService= identityService;
         }
 
         [Authorize(Role.Admin, Role.User)]
@@ -55,24 +59,24 @@ namespace webapinews.Controllers
         [HttpGet("[action]")]
         public async Task<ActionResult<List<BookMarksViewModel>>> Get()
         {
-            var currentUser = (User)HttpContext.Items["User"];
+            var currentUser = _identityService.GetUserId();
             if (currentUser == null)
             {
                 return Unauthorized(new { message = "Unauthorized" });
             }
-            var user = _bookMark.GetById(currentUser.Id).Where(x => x.IsBookMark == true);
+            var user = _bookMark.GetById(currentUser.Value).Where(x => x.IsBookMark == true);
             return Ok(user);
         }
         [Authorize(Role.Admin, Role.User)]
         [HttpGet("[action]")]
         public async Task<ActionResult<PaginatedList<BookMarksViewModel>>> GetBookMarKByActiveId([FromQuery] OwnerStringParameter ownerStringParameter)
         {
-            var currentUser = (User)HttpContext.Items["User"];
+            var currentUser = _identityService.GetUserId();
             if (currentUser == null)
             {
                 return Unauthorized(new { message = "Unauthorized" });
             }
-            var model = _bookMark.GetBookMarkedById(currentUser.Id, ownerStringParameter);
+            var model = _bookMark.GetBookMarkedById(currentUser.Value, ownerStringParameter);
             var metadata = new
             {
                 model.Search,
@@ -92,8 +96,8 @@ namespace webapinews.Controllers
         [HttpPost]
         public async Task<ActionResult<List<BookMark>>> SaveBookmark(int id)
         {
-            var currentUser = (User)HttpContext.Items["User"];
-            var result = _bookMark.BookMarkNews(id, currentUser.Id);
+            var currentUser = _identityService.GetUserId();
+            var result = _bookMark.BookMarkNews(id, currentUser.Value);
 
             if (result == null)
             {
@@ -107,9 +111,8 @@ namespace webapinews.Controllers
         [HttpDelete("{Id}")]
         public async Task<ActionResult<string>> Delete(int id)
         {
-            var currentUser = (User)HttpContext.Items["User"];
-            var result = _bookMark.Delete(id, currentUser.Id);
-
+            var currentUser = _identityService.GetUserId();
+            var result = _bookMark.Delete(id, currentUser.Value);
             if (result == null)
             {
                 return NotFound("No News with such ID Found");

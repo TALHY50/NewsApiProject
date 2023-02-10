@@ -4,7 +4,7 @@ using webapinews.Models;
 
 namespace webapinews.Interface
 {
-    public interface INews
+    public interface INewsReporistory
     {
         IEnumerable<News> GetAll();
         PaginatedList<News> Get(OwnerStringParameter ownerStringParameter);

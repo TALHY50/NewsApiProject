@@ -5,7 +5,6 @@ using NuGet.Protocol;
 using System.ComponentModel;
 using webapinews.Entities;
 using webapinews.Interface;
-using webapinews.Models;
 
 namespace webapinews.Authorization
 {
@@ -22,13 +21,13 @@ namespace webapinews.Authorization
             _roles = roles;
     }
 
-        public async Task Invoke(HttpContext context, IUserService userService, IJwtAuth jwtUtils)
+        public async Task Invoke(HttpContext context, IUserReporistory userReporistory, IJwtAuth jwtUtils)
         {
             var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
             var userId = jwtUtils.ValidateJwtToken(token);
             if (userId != null)
             {
-                context.Items["User"] = userService.GetById(userId.Value);
+                context.Items["User"] = userReporistory.GetById(userId.Value);
             }
             await _next(context);
         }

@@ -1,11 +1,11 @@
 ﻿using webapinews.Entities;
 using webapinews.Helpers;
 using webapinews.Models;
-using static webapinews.Reporistory.BookMarkServices;
+using static webapinews.Reporistory.BookMarkReporistory;
 
 namespace webapinews.Interface
 {
-    public interface IBookMark
+    public interface IBookMarkReporistory
     {
         IEnumerable<News> GetAll();
         PaginatedList<News> Get(OwnerStringParameter ownerStringParameter);

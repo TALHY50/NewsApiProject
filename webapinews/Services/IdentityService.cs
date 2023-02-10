@@ -1,32 +1,25 @@
-﻿using IdentityModel;
-using System.Security.Principal;
-using webapinews.Entities;
+﻿using webapinews.Interface;
 using webapinews.Models;
 
 namespace webapinews.Services
 {
 
-    public class IdentityService
+    public class IdentityServices : IIdentityService
     {
-
-        public Identity GetIdentity(HttpContext context)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public IdentityServices(IHttpContextAccessor httpContextAccessor)
         {
-
-            var user = context.Items["User"] as User;
-            if (user == null)
-            {
-                return null;
-            }
-
-            return new Identity { Id = user.Id };
+            _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+        }
+        public int? GetUserId()
+        {
+            return GetUser()?.Id;
         }
 
-
-        public class Identity
+        private User? GetUser()
         {
-            public int Id { get; set; }
+            return (User?)_httpContextAccessor.HttpContext?.Items.FirstOrDefault(item => item.Key.Equals("User")).Value;
         }
-
     }
 
 

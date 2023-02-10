@@ -10,14 +10,14 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace webapinews.Services
 {
-    public class UserService : IUserService
+    public class UserReporistory : IUserReporistory
     {
         private NewsApiContext _context;
         private IJwtAuth _jwtUtils;
         private readonly AppSettings _appSettings;
        
 
-        public UserService(NewsApiContext context, IJwtAuth jwtUtils, IOptions<AppSettings> appSettings)
+        public UserReporistory(NewsApiContext context, IJwtAuth jwtUtils, IOptions<AppSettings> appSettings)
         {
             _context = context;
             _jwtUtils = jwtUtils;

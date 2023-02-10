@@ -3,12 +3,13 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using webapinews.Entities;
 using webapinews.Interface;
 using webapinews.Models;
 
-namespace webapinews.Services
+namespace webapinews.Authorization
 {
-   
+
 
     public class JwtAuth : IJwtAuth
     {
@@ -28,7 +29,7 @@ namespace webapinews.Services
             {
                 Subject = new ClaimsIdentity(new[] { new Claim("id", user.Id.ToString()) }),
                 Expires = DateTime.UtcNow.AddDays(7),
-                Issuer= "https://localhost:7003",
+                Issuer = "https://localhost:7003",
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
@@ -51,7 +52,7 @@ namespace webapinews.Services
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(key),
                     ValidateIssuer = false,
-                    ValidIssuer= "https://localhost:7003",
+                    ValidIssuer = "https://localhost:7003",
                     ValidateAudience = false,
                     // set clockskew to zero so tokens expire exactly at token expiration time (instead of 5 minutes later)
                     ClockSkew = TimeSpan.Zero

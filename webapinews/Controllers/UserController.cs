@@ -18,17 +18,19 @@ namespace webapinews.Controllers
     public class UserController : ControllerBase
     {
 
-        private IUserService _userService;
+        private IUserReporistory _userReporsitory;
+        private IIdentityService _identityService;
 
-        public UserController(IUserService userService)
+        public UserController(IUserReporistory userReporsitory, IIdentityService identityService)
         {
-            _userService = userService;
+            _userReporsitory = userReporsitory;
+            _identityService = identityService;
         }
         [AllowAnonymous]
         [HttpPost("[action]")]
         public IActionResult Login(UserDataRequest model)
         {
-            var response = _userService.Authenticate(model);
+            var response = _userReporsitory.Authenticate(model);
             return Ok(response);
         }
         [AllowAnonymous]
@@ -36,25 +38,25 @@ namespace webapinews.Controllers
         public IActionResult Registor(User model)
         {
 
-            _userService.Register(model);
+            _userReporsitory.Register(model);
             return Ok(new { message = "Registration successful" });
         }
         [Authorize(Role.Admin)]
         [HttpGet("[action]")]
         public IActionResult Get()
         {
-            var users = _userService.GetAll();
+            var users = _userReporsitory.GetAll();
             return Ok(users);
         }
         [Authorize(Role.Admin)]
         [HttpGet]
         public async Task<ActionResult<PaginatedList<User>>> Get([FromQuery] OwnerStringParameter ownerStringParameter)
         {
-            if (_userService == null)
+            if (_userReporsitory == null)
             {
                 return NotFound("No Data found");
             }
-            var model = _userService.Get(ownerStringParameter);
+            var model = _userReporsitory.Get(ownerStringParameter);
             var metadata = new
             {
                 model.TotalCount,
@@ -67,16 +69,16 @@ namespace webapinews.Controllers
             Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
             return Ok(model);
         }
-
+        [Authorize(Role.Admin)]
         [HttpGet("{Id}")]
         public IActionResult GetById(int id)
         {
             //only admins can access other user records
-           var currentUser = (User)HttpContext.Items["User"];
-            if (id != currentUser.Id && currentUser.Role != Role.Admin)
+            var currentUser = _identityService.GetUserId();
+            if (id != currentUser)
                 return Unauthorized(new { message = "Unauthorized" });
 
-            var user = _userService.GetById(id);
+            var user = _userReporsitory.GetById(id);
             return Ok(user);
         }
         [Authorize(Role.Admin)]
@@ -88,13 +90,17 @@ namespace webapinews.Controllers
                 return Ok(new { message = "User Id not Found" });
             }
             model.Id = id;
-            _userService.Update(model);
+            _userReporsitory.Update(model);
             return Ok(new { message = "User updated successfully" });
         }
         [Authorize(Role.Admin)]
         [HttpDelete("[action]")]
         public IActionResult Delete(int id) {
-            _userService.Delete(id);
+            if(_userReporsitory == null)
+            {
+                return BadRequest(new { message = "User NOT FOUND" });
+            }
+           _userReporsitory.Delete(id);
             return Ok(new { message = "User deleted successfully" });
 
         }

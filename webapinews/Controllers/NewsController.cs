@@ -18,32 +18,32 @@ namespace webapinews.Controllers
     [ApiController]
     public class NewsController : ControllerBase
     {
-        private INews _newsService;
+        private INewsReporistory _newsReporsitory;
 
-        public NewsController(INews newsService)
+        public NewsController(INewsReporistory newsReporsitory)
         {
-            _newsService = newsService;
+            _newsReporsitory = newsReporsitory;
         }
         [AllowAnonymous]
         [HttpGet("[action]")]
         public async Task<ActionResult<IEnumerable<News>>> Get()
         {
-            if (_newsService == null)
+            if (_newsReporsitory == null)
             {
                 return NotFound("Not Found");
 
             }
-            return  _newsService.GetAll().ToList();
+            return  _newsReporsitory.GetAll().ToList();
         }
         [AllowAnonymous]
         [HttpGet]
         public async Task<ActionResult<PaginatedList<News>>> Get([FromQuery] OwnerStringParameter ownerStringParameter)
         {
-            if (_newsService == null)
+            if (_newsReporsitory == null)
             {
                 return NotFound("No Data found");
             }
-            var model = _newsService.Get(ownerStringParameter);
+            var model = _newsReporsitory.Get(ownerStringParameter);
             var metadata = new
             {
                
@@ -62,7 +62,7 @@ namespace webapinews.Controllers
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
-            var news = _newsService.GetById(id);
+            var news = _newsReporsitory.GetById(id);
             return Ok(news);
         }
 
@@ -74,7 +74,7 @@ namespace webapinews.Controllers
             {
             return BadRequest(new { message = "News Not SucessFully Added" });
             }
-            _newsService.Add(news);
+            _newsReporsitory.Add(news);
             return Ok(new { message = "News successful Added" });
         }
 
@@ -86,7 +86,7 @@ namespace webapinews.Controllers
             {
                 return BadRequest(new { message = "News Id Not Found " });
             }
-            _newsService.Update(id, news);
+            _newsReporsitory.Update(id, news);
             return Ok(new { message = "News updated successfully" });
         }
 
@@ -94,11 +94,11 @@ namespace webapinews.Controllers
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            if(_newsService == null)
+            if(_newsReporsitory == null)
             {
                 return BadRequest(new { message = "Deleted News Id not Found" });
             }
-            _newsService.Delete(id);
+            _newsReporsitory.Delete(id);
             return Ok(new { message = "News deleted successfully" });
 
         }

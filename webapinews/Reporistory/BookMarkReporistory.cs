@@ -1,45 +1,40 @@
-﻿using webapinews.Interface;
-using webapinews.Models;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.OpenApi;
-using Microsoft.AspNetCore.Http.HttpResults;
-using static webapinews.Reporistory.BookMarkServices;
+﻿using Microsoft.EntityFrameworkCore;
 using webapinews.Entities;
 using webapinews.Helpers;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using webapinews.Interface;
+using webapinews.Models;
 
 namespace webapinews.Reporistory
 {
-    public class BookMarkServices : IBookMark
+    public class BookMarkReporistory : IBookMarkReporistory
     {
 
-            private readonly NewsApiContext _context;
-            private IJwtAuth _jwtUtils;
-            int _nextId = 0;
-        public BookMarkServices(NewsApiContext context, IJwtAuth jwtutils)
-            {
-                _context = context;
-                _jwtUtils = jwtutils;
-             
-            }
-            public bool Delete(int id, int userId)
-            {
-                var user = _context.BookMarks.Where(x => x.UserId == userId && x.NewsId == id).FirstOrDefault();
+        private readonly NewsApiContext _context;
+        private IJwtAuth _jwtUtils;
+        int _nextId = 0;
+        public BookMarkReporistory(NewsApiContext context, IJwtAuth jwtutils)
+        {
+            _context = context;
+            _jwtUtils = jwtutils;
 
-                if (user is null)
-                {
-                    return false;
-                }
+        }
+        public bool Delete(int id, int userId)
+        {
+            var user = _context.BookMarks.Where(x => x.UserId == userId && x.NewsId == id).FirstOrDefault();
 
-                _context.BookMarks.Remove(user);
-                _context.SaveChanges();
-                return true;
+            if (user is null)
+            {
+                return false;
             }
+
+            _context.BookMarks.Remove(user);
+            _context.SaveChanges();
+            return true;
+        }
 
         public IEnumerable<News> GetAll()
         {
-           return _context.News;
+            return _context.News;
         }
         public PaginatedList<News> Get(OwnerStringParameter ownerStringParameter)
         {
@@ -80,7 +75,7 @@ namespace webapinews.Reporistory
 
         public List<BookMarksViewModel> GetById(int id)
         {
-            
+
             var user = _context.BookMarks.Include(e => e.User)
             .Include(e => e.News).
             Where(e => e.UserId == id)
@@ -88,13 +83,13 @@ namespace webapinews.Reporistory
             var mappedData = user.Select(e => new BookMarksViewModel
             {
                 UserId = e.UserId,
-                Email= e.User.Email,
-                NewsId= e.NewsId,
+                Email = e.User.Email,
+                NewsId = e.NewsId,
                 Aurthor = e.News.Aurthor,
                 Title = e.News.Title,
-                 Content= e.News.Content,
+                Content = e.News.Content,
                 CreationDate = e.News.CreationDate,
-                 IsBookMark =e.IsBookMark
+                IsBookMark = e.IsBookMark
             });
             return mappedData.ToList();
         }
@@ -133,14 +128,14 @@ namespace webapinews.Reporistory
             }
             var result = PaginatedList<BookMarksViewModel>.Create(mappedData, ownerStringParameter);
             return result;
-            
+
         }
 
         public bool Update(int id, BookMark bookMark)
         {
             throw new NotImplementedException();
         }
-        
+
     }
-    
+
 }

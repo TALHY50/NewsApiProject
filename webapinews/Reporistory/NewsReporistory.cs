@@ -8,12 +8,12 @@ using webapinews.Models;
 
 namespace webapinews.Reporistory
 {
-    public class NewsService : INews
+    public class NewsReporistory : INewsReporistory
     {
 
         private NewsApiContext _context;
 
-        public NewsService(NewsApiContext context)
+        public NewsReporistory(NewsApiContext context)
         {
             _context = context;
             
