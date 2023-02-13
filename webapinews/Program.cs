@@ -25,11 +25,11 @@ var builder = WebApplication.CreateBuilder(args);
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
 );
 builder.Services.AddCors();
-builder.Services.AddControllers().AddJsonOptions(x =>
-{
-        // serialize enums as strings in api responses (e.g. Role)
-    x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-});
+//builder.Services.AddControllers().AddJsonOptions(x =>
+//{
+//        // serialize enums as strings in api responses (e.g. Role)
+//    x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+//});
 
     // configure strongly typed settings object
     builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
@@ -91,14 +91,5 @@ app.UseHttpsRedirection();
 app.UseMiddleware<ErrorHandlerMiddleware>();
 // custom jwt auth middleware
 app.UseMiddleware<JwtMiddleware>();
-//app.Use(async (context, next) =>
-//{
-
-//    context.Response.StatusCode = 401;
-//    context.Response.ContentType = "application/json";
-
-//    await next.Invoke();
-//    Code Logic
-//});
 app.MapControllers();
 app.Run();

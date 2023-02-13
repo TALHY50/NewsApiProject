@@ -42,7 +42,7 @@ namespace webapinews.Authorization
                 return null;
 
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+            var key = Encoding.ASCII.GetBytes(_appSettings.Secret); 
             try
             {
 

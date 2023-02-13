@@ -8,7 +8,7 @@ namespace webapinews.Entities
         public string Username { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
-        public Role Role { get; set; }
+        //public Role Role { get; set; }
         public string Token { get; set; }
 
         public UserDataResponse(User user, string token)
@@ -17,7 +17,7 @@ namespace webapinews.Entities
             Username = user.UserName;
             Email = user.Email;
             Password = user.Password;
-            Role = user.Role;
+            //Role = user.Role;
             Token = token;
         }
     }

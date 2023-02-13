@@ -1,12 +1,9 @@
 ﻿using Microsoft.Extensions.Options;
 using webapinews.Models;
-using BCrypt.Net;
 using webapinews.Interface;
 using webapinews.Entities;
 using webapinews.ExceptionHandler;
-using Microsoft.EntityFrameworkCore;
 using webapinews.Helpers;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace webapinews.Services
 {
