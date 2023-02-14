@@ -69,7 +69,7 @@ namespace webapinews.Services
             return user;
         }
 
-        public void Register(User model)
+        public User Register(User model)
         {
             if (_context.Users.Any(x => x.UserName == model.UserName))
                 throw new AppException("Username '" + model.UserName + "' is already taken");
@@ -81,16 +81,17 @@ namespace webapinews.Services
             //model.Role = model.Role;
             _context.Users.Add(model);
             _context.SaveChanges();
+            return model;
         }
 
-        public bool Update(User model)
+        public User Update(User model)
         {
 
             var user = _context.Users.Where(s => s.Id == model.Id).FirstOrDefault();
             if (user == null)
             {
 
-                return false;
+                return null;
             } 
             user.Id = model.Id;
             user.UserName = model.UserName;
@@ -99,10 +100,10 @@ namespace webapinews.Services
             user.Role = model.Role;
             _context.Users.Update(user);
             _context.SaveChanges();
-            return true;
+            return user;
         }
 
-        public void Delete(int id)
+        public User Delete(int id)
         {
             var user = _context.Users.Find(id);
             if (user == null) throw new KeyNotFoundException("User not found");
@@ -110,6 +111,7 @@ namespace webapinews.Services
             _context.BookMarks.RemoveRange(bookmarks);
             _context.Users.Remove(user);
             _context.SaveChanges();
+            return user;
         }
 
 

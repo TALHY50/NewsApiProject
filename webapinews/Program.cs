@@ -11,6 +11,7 @@ using Swashbuckle.AspNetCore.Filters;
 using Microsoft.AspNetCore.Builder;
 using webapinews.Entities;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using MediatR;
 //using webapinews.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,11 +26,11 @@ var builder = WebApplication.CreateBuilder(args);
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
 );
 builder.Services.AddCors();
-//builder.Services.AddControllers().AddJsonOptions(x =>
-//{
-//        // serialize enums as strings in api responses (e.g. Role)
-//    x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-//});
+builder.Services.AddControllers().AddJsonOptions(x =>
+{
+        // serialize enums as strings in api responses (e.g. Role)
+    x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
 
     // configure strongly typed settings object
     builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
@@ -37,13 +38,15 @@ builder.Services.AddCors();
     // configure DI for application services
     builder.Services.AddScoped<IJwtAuth, JwtAuth>();
     builder.Services.AddScoped<IUserReporistory, UserReporistory>();
+    builder.Services.AddMediatR(typeof(UserReporistory).Assembly);
     builder.Services.AddScoped<INewsReporistory, NewsReporistory>();
+    builder.Services.AddMediatR(typeof(NewsReporistory).Assembly);
     builder.Services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
     builder.Services.AddScoped(typeof(IIdentityService), typeof(IdentityServices));
 
 
     builder.Services.AddScoped<IBookMarkReporistory, BookMarkReporistory>();
-
+    builder.Services.AddMediatR(typeof(BookMarkReporistory).Assembly);
 }
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

@@ -6,13 +6,13 @@ namespace webapinews.Interface
 {
     public interface INewsReporistory
     {
-        IEnumerable<News> GetAll();
+        List<News> GetAll();
         PaginatedList<News> Get(OwnerStringParameter ownerStringParameter);
      
         News Add(News news); 
         News GetById(int id);
-        bool Update(int id, News news);
-        void Delete(int id);
+        News Update(int id, News news);
+        News Delete(int id);
 
         
     }

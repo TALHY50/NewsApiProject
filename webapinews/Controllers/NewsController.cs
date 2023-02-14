@@ -1,13 +1,11 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using System.Drawing.Printing;
+using webapinews.Command.News_Commands;
 using webapinews.Entities;
 using webapinews.Helpers;
-using webapinews.Interface;
 using webapinews.Models;
-using webapinews.Services;
+using webapinews.Qurey.News_Qurey;
 using AllowAnonymousAttribute = webapinews.Services.AllowAnonymousAttribute;
 using AuthorizeAttribute = webapinews.Services.AuthorizeAttribute;
 
@@ -18,87 +16,92 @@ namespace webapinews.Controllers
     [ApiController]
     public class NewsController : ControllerBase
     {
-        private INewsReporistory _newsReporsitory;
+        private readonly IMediator _mediator;
 
-        public NewsController(INewsReporistory newsReporsitory)
+        public NewsController(IMediator mediator)
         {
-            _newsReporsitory = newsReporsitory;
+            _mediator = mediator;
         }
         [AllowAnonymous]
         [HttpGet("[action]")]
-        public async Task<ActionResult<IEnumerable<News>>> Get()
+        public async Task<ActionResult<List<News>>> Get()
         {
-            if (_newsReporsitory == null)
+            if (_mediator == null)
             {
                 return NotFound("Not Found");
 
             }
-            return  _newsReporsitory.GetAll().ToList();
+            return await _mediator.Send(new GetNewsListQuery());
         }
         [AllowAnonymous]
         [HttpGet]
         public async Task<ActionResult<PaginatedList<News>>> Get([FromQuery] OwnerStringParameter ownerStringParameter)
         {
-            if (_newsReporsitory == null)
+            if (_mediator == null)
             {
                 return NotFound("No Data found");
             }
-            var model = _newsReporsitory.Get(ownerStringParameter);
+            var newsTask = _mediator.Send(new GetNewsPagenatedQuery(ownerStringParameter));
+            var newsList = await newsTask;
             var metadata = new
             {
-               
-                model.TotalCount,
-                model.PageSize,
-                model.CurrentPage,
-                model.TotalPages,
-                model.HasNextPage,
-                model.HasPreviousPage
+                newsList.TotalCount,
+                newsList.PageSize,
+                newsList.CurrentPage,
+                newsList.TotalPages,
+                newsList.HasNextPage,
+                newsList.HasPreviousPage
             };
             Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
-            return Ok(model);
+            return Ok(newsList);
         }
 
         [Authorize(Role.Admin, Role.User)]
         [HttpGet("{id}")]
-        public IActionResult GetById(int id)
+
+        public async Task<ActionResult<News>> GetById(int id)
         {
-            var news = _newsReporsitory.GetById(id);
-            return Ok(news);
+            if(_mediator == null)
+            {
+                return NotFound("No Record Found");
+            }
+            var result =  await _mediator.Send(new GetNewsByIdQuery(id));
+            return result;
         }
 
         [Authorize(Role.Admin)]
         [HttpPost("[action]")]
-        public IActionResult Add(News news)
+        public async Task<ActionResult<News>> Post(News news)
         {
             if (news == null)
             {
-            return BadRequest(new { message = "News Not SucessFully Added" });
+                return BadRequest(new { message = "News Was Not SucessFully Added" });
             }
-            _newsReporsitory.Add(news);
-            return Ok(new { message = "News successful Added" });
+             await _mediator.Send(new AddNewsCommand(news));
+            return Ok(new { message = "News updated successfully" });
         }
 
         [Authorize(Role.Admin)]
         [HttpPut("{id}")]
-        public IActionResult Update(int id, News news)
+        public async Task<ActionResult<News>> Update(int id, News news)
         {
             if(news == null)
             {
                 return BadRequest(new { message = "News Id Not Found " });
             }
-            _newsReporsitory.Update(id, news);
+            _mediator?.Send(new UpdateNewsCommand(id, news));
             return Ok(new { message = "News updated successfully" });
         }
 
         [Authorize(Role.Admin)]
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<ActionResult<News>> Delete(int id)
         {
-            if(_newsReporsitory == null)
+            if(_mediator == null)
             {
-                return BadRequest(new { message = "Deleted News Id not Found" });
+                return BadRequest(new { message = "Request Deleted News Not Found" });
             }
-            _newsReporsitory.Delete(id);
+            _mediator?.Send(new DeleteNewsCommand(id));
             return Ok(new { message = "News deleted successfully" });
 
         }

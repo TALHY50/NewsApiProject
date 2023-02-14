@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 using System.Drawing.Printing;
 using System.Globalization;
 using webapinews.Entities;
@@ -18,11 +19,11 @@ namespace webapinews.Reporistory
             _context = context;
             
         }
-        public IEnumerable<News> GetAll()
+        public List<News> GetAll()
 
         {
             var news = _context.News;
-            return news;
+            return news.ToList();
         }
         public PaginatedList<News> Get(OwnerStringParameter ownerStringParameter)
         {
@@ -30,6 +31,7 @@ namespace webapinews.Reporistory
             if (!string.IsNullOrEmpty(ownerStringParameter.search))
             {
                 qurey = qurey.Where(hh => hh.Title.Contains(ownerStringParameter.search));
+                qurey = qurey.Where(hh => hh.Aurthor.Contains(ownerStringParameter.search));
             }
             qurey = qurey.OrderBy(hh => hh.Aurthor);
             if (!string.IsNullOrEmpty(ownerStringParameter.SortBy))
@@ -56,15 +58,19 @@ namespace webapinews.Reporistory
             return news;
         }
 
-        public void Delete(int id)
+        public News Delete(int id)
         {
             var news = _context.News.FirstOrDefault(x => x.Id == id);
             if (news == null) throw new KeyNotFoundException("News not found");
-            var bookMark = _context.BookMarks.FirstOrDefault(x => x.NewsId== id);
-            _context.BookMarks.RemoveRange(bookMark);
+
+            var bookmarks = _context.BookMarks.Where(x => x.NewsId == id);
+            _context.BookMarks.RemoveRange(bookmarks);
+
             _context.News.Remove(news);
             _context.SaveChanges();
-           
+
+            return news;
+
         }
 
         public News GetById(int id)
@@ -75,13 +81,13 @@ namespace webapinews.Reporistory
            
         }
 
-        public bool Update(int id ,News news)
+        public News Update(int id ,News news)
         {
             var request = _context.News.FirstOrDefault(x => x.Id == id);
 
             if (request == null)
             {
-                return false;
+                return null;
             }
           
             request.Title = news.Title;
@@ -89,7 +95,7 @@ namespace webapinews.Reporistory
             request.Content = news.Content;
             _context.News.Update(news);
             _context.SaveChanges();
-            return true;
+            return request;
         }
         
     }

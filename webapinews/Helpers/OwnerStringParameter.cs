@@ -24,7 +24,7 @@ namespace webapinews.Helpers
                 _search = value;
             }
         }
-    public int PageNumber { get; set; } = 1;
+        public int PageNumber { get; set; } = 1;
         private int _pageSize = 10;
         public int PageSize
         {

@@ -35,12 +35,12 @@ public partial class NewsApiContext : DbContext
 
             entity.HasOne(d => d.News).WithMany(p => p.BookMarks)
                 .HasForeignKey(d => d.NewsId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_BookMark_News");
 
             entity.HasOne(d => d.User).WithMany(p => p.BookMarks)
                 .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_BookMark_Users");
         });
 

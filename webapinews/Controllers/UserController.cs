@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using webapinews.Command.User_Commands;
 using webapinews.Entities;
 using webapinews.Helpers;
 using webapinews.Interface;
 using webapinews.Models;
-using webapinews.Reporistory;
-using webapinews.Services;
+using webapinews.Qurey.User_Qurey;
 using AllowAnonymousAttribute = webapinews.Services.AllowAnonymousAttribute;
 using AuthorizeAttribute = webapinews.Services.AuthorizeAttribute;
 
@@ -18,45 +18,53 @@ namespace webapinews.Controllers
     public class UserController : ControllerBase
     {
 
-        private IUserReporistory _userReporsitory;
+        
         private IIdentityService _identityService;
+        private readonly IMediator _mediator;
 
-        public UserController(IUserReporistory userReporsitory, IIdentityService identityService)
+        public UserController(IMediator mediator, IIdentityService identityService)
         {
-            _userReporsitory = userReporsitory;
+            _mediator = mediator;
             _identityService = identityService;
         }
         [AllowAnonymous]
         [HttpPost("[action]")]
-        public IActionResult Login(UserDataRequest model)
+        public async Task<ActionResult<UserDataResponse>> Login(UserDataRequest model)
         {
-            var response = _userReporsitory.Authenticate(model);
+            if(model == null )
+            {
+                return NotFound(new { message = "NO User Found" });
+            }
+            var response = await _mediator.Send(new loginCommand(model));
             return Ok(response);
         }
         [AllowAnonymous]
         [HttpPost("[action]")]
-        public IActionResult Registor(User model)
+        public async Task<ActionResult<User>> Registration(User model)
         {
-
-            _userReporsitory.Register(model);
+            if(model == null)
+            {
+                return Ok(new { message = "Invalid Credential" });
+            }
+            await _mediator.Send(new RegistorUserCommand(model));
             return Ok(new { message = "Registration successful" });
         }
         [Authorize(Role.Admin)]
         [HttpGet("[action]")]
-        public IActionResult Get()
+        public async Task<ActionResult<List<User>>> Get()
         {
-            var users = _userReporsitory.GetAll();
+            var users = await _mediator.Send(new GetUserListQuery());
             return Ok(users);
         }
         [Authorize(Role.Admin)]
         [HttpGet]
         public async Task<ActionResult<PaginatedList<User>>> Get([FromQuery] OwnerStringParameter ownerStringParameter)
         {
-            if (_userReporsitory == null)
+            if (ownerStringParameter == null)
             {
-                return NotFound("No Data found");
+                return NotFound("Pagination Not Applied");
             }
-            var model = _userReporsitory.Get(ownerStringParameter);
+            var model = await _mediator.Send(new GetUserPagenatedQuery(ownerStringParameter));
             var metadata = new
             {
                 model.TotalCount,
@@ -67,40 +75,38 @@ namespace webapinews.Controllers
                 model.HasPreviousPage
             };
             Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
-            return Ok(model);
+            return Ok(metadata);
         }
         [Authorize(Role.Admin)]
         [HttpGet("{Id}")]
-        public IActionResult GetById(int id)
+        public async Task<ActionResult<User>> GetById(int id)
         {
             //only admins can access other user records
             var currentUser = _identityService.GetUserId();
             if (id != currentUser)
                 return Unauthorized(new { message = "Unauthorized" });
-
-            var user = _userReporsitory.GetById(id);
+            var user = await _mediator.Send(new GetUserByIdQuery(id));
             return Ok(user);
         }
         [Authorize(Role.Admin)]
         [HttpPut("update")]
-        public IActionResult Update(int id, User model)
+        public async Task<ActionResult<User>> Update(int id, User model)
         {
            if(model == null)
             {
                 return Ok(new { message = "User Id not Found" });
             }
             model.Id = id;
-            _userReporsitory.Update(model);
+            await _mediator.Send(new UpdateUserCommand(model));
             return Ok(new { message = "User updated successfully" });
         }
         [Authorize(Role.Admin)]
         [HttpDelete("[action]")]
-        public IActionResult Delete(int id) {
-            if(_userReporsitory == null)
-            {
-                return BadRequest(new { message = "User NOT FOUND" });
-            }
-           _userReporsitory.Delete(id);
+        public async Task<ActionResult<User>> Delete(int id) {
+            var currentUser = _identityService.GetUserId();
+            if (id != currentUser)
+            return Unauthorized(new { message = "Unauthorized" });
+            await  _mediator.Send(new DeleteUserCommand(id));
             return Ok(new { message = "User deleted successfully" });
 
         }

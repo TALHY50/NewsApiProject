@@ -11,8 +11,8 @@ namespace webapinews.Interface
         List<User> GetAll();
         PaginatedList<User> Get(OwnerStringParameter ownerStringParameter);
         User GetById(int id);
-        void Register(User model);
-        bool Update(User model);
-        void Delete(int id);
+        User Register(User model);
+        User Update(User model);
+        User Delete(int id);
     }
 }

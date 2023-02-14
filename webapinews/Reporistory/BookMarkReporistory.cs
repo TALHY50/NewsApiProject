@@ -18,33 +18,18 @@ namespace webapinews.Reporistory
             _jwtUtils = jwtutils;
 
         }
-        public bool Delete(int id, int userId)
+        public BookMark Delete(int id, int userId)
         {
             var user = _context.BookMarks.Where(x => x.UserId == userId && x.NewsId == id).FirstOrDefault();
 
             if (user is null)
             {
-                return false;
+                return null;
             }
 
             _context.BookMarks.Remove(user);
             _context.SaveChanges();
-            return true;
-        }
-
-        public IEnumerable<News> GetAll()
-        {
-            return _context.News;
-        }
-        public PaginatedList<News> Get(OwnerStringParameter ownerStringParameter)
-        {
-            var qurey = _context.News.AsQueryable();
-            if (!string.IsNullOrEmpty(ownerStringParameter.search))
-            {
-                qurey = qurey.Where(hh => hh.Title.Contains(ownerStringParameter.search));
-            }
-            var result = PaginatedList<News>.Create(qurey, ownerStringParameter);
-            return result;
+            return user;
         }
         public List<BookMark> BookMarkNews(int newsId, int userId)
         {
@@ -131,10 +116,6 @@ namespace webapinews.Reporistory
 
         }
 
-        public bool Update(int id, BookMark bookMark)
-        {
-            throw new NotImplementedException();
-        }
 
     }
 

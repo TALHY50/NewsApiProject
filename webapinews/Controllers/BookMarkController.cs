@@ -1,9 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using webapinews.Command.BookMark_Commands;
 using webapinews.Entities;
 using webapinews.Helpers;
 using webapinews.Interface;
 using webapinews.Models;
+using webapinews.Qurey.BookMark_Qurey;
+using webapinews.Qurey.News_Qurey;
 using webapinews.Reporistory;
 using webapinews.Services;
 using AuthorizeAttribute = webapinews.Services.AuthorizeAttribute;
@@ -16,43 +20,49 @@ namespace webapinews.Controllers
     [ApiController]
     public class BookMarkController : ControllerBase
     {
+        private readonly IMediator _mediator;
         private readonly IBookMarkReporistory _bookMark;
         private IIdentityService _identityService;
 
-        public BookMarkController(IBookMarkReporistory bookMark,IIdentityService identityService) 
+        public BookMarkController(IBookMarkReporistory bookMark,IIdentityService identityService, IMediator mediator) 
         
         {
             _bookMark = bookMark;
             _identityService= identityService;
+            _mediator= mediator;
         }
 
         [Authorize(Role.Admin, Role.User)]
         [HttpGet("[action]")]
-        public IActionResult GetAllNews()
+        public async Task<ActionResult<List<News>>> GetAll()
         {
-            var users = _bookMark.GetAll();
-            return Ok(users);
+            if (_mediator == null)
+            {
+                return NotFound("Not Found");
+
+            }
+            return await _mediator.Send(new GetNewsListQuery());
         }
         [Authorize(Role.Admin, Role.User)]
         [HttpGet]
         public async Task<ActionResult<PaginatedList<News>>> Get([FromQuery] OwnerStringParameter ownerStringParameter)
         {
-            if (_bookMark == null)
+            if (_mediator == null)
             {
                 return NotFound("No Data found");
             }
-            var model = _bookMark.Get(ownerStringParameter);
+            var newsList = await _mediator.Send(new GetNewsPagenatedQuery(ownerStringParameter));
             var metadata = new
             {
-                model.TotalCount,
-                model.PageSize,
-                model.CurrentPage,
-                model.TotalPages,
-                model.HasNextPage,
-                model.HasPreviousPage
+                newsList.TotalCount,
+                newsList.PageSize,
+                newsList.CurrentPage,
+                newsList.TotalPages,
+                newsList.HasNextPage,
+                newsList.HasPreviousPage
             };
             Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
-            return Ok(model);
+            return Ok(metadata);
         }
 
         [Authorize(Role.Admin , Role.User)]
@@ -64,7 +74,7 @@ namespace webapinews.Controllers
             {
                 return Unauthorized(new { message = "Unauthorized" });
             }
-            var user = _bookMark.GetById(currentUser.Value).Where(x => x.IsBookMark == true);
+            var user = await _mediator.Send(new GetBookMarkByIdQuery(currentUser.Value));
             return Ok(user);
         }
         [Authorize(Role.Admin, Role.User)]
@@ -76,7 +86,7 @@ namespace webapinews.Controllers
             {
                 return Unauthorized(new { message = "Unauthorized" });
             }
-            var model = _bookMark.GetBookMarkedById(currentUser.Value, ownerStringParameter);
+            var model =  await _mediator.Send(new PagenatedBookMarkNewsQurey(currentUser.Value, ownerStringParameter));
             var metadata = new
             {
                 model.Search,
@@ -97,27 +107,27 @@ namespace webapinews.Controllers
         public async Task<ActionResult<List<BookMark>>> SaveBookmark(int id)
         {
             var currentUser = _identityService.GetUserId();
-            var result = _bookMark.BookMarkNews(id, currentUser.Value);
+            var result = _mediator.Send(new SaveBookMarkCommand(id, currentUser.Value));
 
             if (result == null)
             {
                 return NotFound("Enter the valid email or News ID");
             }
-            return Ok(result);
+            return Ok(new { message = "News successfully BookMark" });
         }
 
        
         [Authorize(Role.Admin, Role.User)]
         [HttpDelete("{Id}")]
-        public async Task<ActionResult<string>> Delete(int id)
+        public async Task<ActionResult<BookMark>> Delete(int id)
         {
             var currentUser = _identityService.GetUserId();
-            var result = _bookMark.Delete(id, currentUser.Value);
+            var result = _mediator.Send(new DeleteBookMarkCommand(id, currentUser.Value));
             if (result == null)
             {
                 return NotFound("No News with such ID Found");
             }
-            return Ok(result);
+            return Ok(new { message = "BookMarked News successfully Deleted" });
         }
 
     }
