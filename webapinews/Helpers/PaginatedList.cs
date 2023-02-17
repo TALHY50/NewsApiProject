@@ -45,7 +45,8 @@ namespace webapinews.Helpers
            paginatedViewModel.PageSize,
                 paginatedViewModel.search,
                 paginatedViewModel.SortBy,
-               totalPages,count);
+               totalPages,
+               count);
             
             return paginatedResult;
         }
