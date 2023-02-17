@@ -1,5 +1,5 @@
-﻿using webapinews.Entities;
-using webapinews.Helpers;
+﻿using webapinews.Helpers;
+using webapinews.Mappers.BookMarkMapper;
 using webapinews.Models;
 using static webapinews.Reporistory.BookMarkReporistory;
 
@@ -9,9 +9,9 @@ namespace webapinews.Interface
     {
         List<BookMark> BookMarkNews(int newsId, int userId);
         List<BookMarksViewModel> GetById(int id);
-        PaginatedList<BookMarksViewModel> GetBookMarkedById(int id,OwnerStringParameter ownerStringParameter);
+        PaginatedList<BookMarksViewModel> GetBookMarkedById(int id,PaginatedViewModel paginatedViewModel);
     
-        BookMark Delete(int id, int userId);
+        string Delete(int id, int userId);
        
     }
 }

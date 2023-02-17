@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Drawing.Printing;
 using System.Globalization;
@@ -25,18 +26,17 @@ namespace webapinews.Reporistory
             var news = _context.News;
             return news.ToList();
         }
-        public PaginatedList<News> Get(OwnerStringParameter ownerStringParameter)
+        public PaginatedList<News> Get(PaginatedViewModel paginatedViewModel)
         {
             var qurey = _context.News.AsQueryable();
-            if (!string.IsNullOrEmpty(ownerStringParameter.search))
+            if (!string.IsNullOrEmpty(paginatedViewModel.search))
             {
-                qurey = qurey.Where(hh => hh.Title.Contains(ownerStringParameter.search));
-                qurey = qurey.Where(hh => hh.Aurthor.Contains(ownerStringParameter.search));
+                qurey = qurey.Where(hh => hh.Title.Contains(paginatedViewModel.search));
             }
             qurey = qurey.OrderBy(hh => hh.Aurthor);
-            if (!string.IsNullOrEmpty(ownerStringParameter.SortBy))
+            if (!string.IsNullOrEmpty(paginatedViewModel.SortBy))
             {
-                switch (ownerStringParameter.SortBy)
+                switch (paginatedViewModel.SortBy)
                 {
                     case "title_desc": qurey = qurey.OrderByDescending(hh => hh.Title); break;
                     case "aurthor_asc": qurey = qurey.OrderBy(hh => hh.Aurthor); break;
@@ -46,7 +46,7 @@ namespace webapinews.Reporistory
                 }
             }
 
-            var result = PaginatedList<News>.Create(qurey, ownerStringParameter);
+            var result = PaginationHelper.Create(qurey, paginatedViewModel);
             return result;
         }
         public News Add(News news)
@@ -58,18 +58,18 @@ namespace webapinews.Reporistory
             return news;
         }
 
-        public News Delete(int id)
+        public string Delete(int id)
         {
             var news = _context.News.FirstOrDefault(x => x.Id == id);
-            if (news == null) throw new KeyNotFoundException("News not found");
-
+            if (news == null)
+            {
+                return null;
+            }
             var bookmarks = _context.BookMarks.Where(x => x.NewsId == id);
             _context.BookMarks.RemoveRange(bookmarks);
-
             _context.News.Remove(news);
             _context.SaveChanges();
-
-            return news;
+            return "News Deleted SuccessFully";
 
         }
 
@@ -81,19 +81,15 @@ namespace webapinews.Reporistory
            
         }
 
-        public News Update(int id ,News news)
+        public News Update(News news)
         {
-            var request = _context.News.FirstOrDefault(x => x.Id == id);
+            var request = _context.News.Where(x => x.Id ==news.Id).FirstOrDefault();
 
             if (request == null)
             {
                 return null;
             }
-          
-            request.Title = news.Title;
-            request.Aurthor = news.Aurthor;
-            request.Content = news.Content;
-            _context.News.Update(news);
+            _context.News.Update(request);
             _context.SaveChanges();
             return request;
         }

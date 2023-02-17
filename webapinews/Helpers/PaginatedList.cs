@@ -1,43 +1,53 @@
-﻿using webapinews.Entities;
+﻿using System.Drawing.Printing;
+using webapinews.Entities;
 
 namespace webapinews.Helpers
 {
 
-    public class PaginatedList<T> : List<T>
+    public class PaginatedList<T> 
     {
-        public int CurrentPage { get; private set; }
-        public int PageSize { get; private set; }
+        public List<T> Items { get; set; } = new List<T>();
+        public int CurrentPage { get; set; }
+        public int PageSize { get; set; }
         public string Search { get; private set; }
-        public string SortBy {get; private set; }
-        public int TotalPages { get; private set; }
-        public int TotalCount { get; private set; }
+        public string SortBy { get; set; }
+        public int TotalPages { get; set; }
+        public int Count { get; set; }
+      
         public bool HasPreviousPage { get { return (CurrentPage > 1); } }
         public bool HasNextPage { get { return (CurrentPage < TotalPages); } }
 
-        public PaginatedList(List<T> items, int count, int pageIndex, int pageSize, string search,string sortby)
+        
+        public PaginatedList<T> SetValues(List<T> items, int currentPage, int pageSize, string search, string sortBy, int totalPages, int count)
         {
-            SortBy = sortby;
-            Search = search;
-            CurrentPage = pageIndex;
+            CurrentPage = currentPage;
             PageSize = pageSize;
-            TotalCount = count;
-            TotalPages = (int)Math.Ceiling(count / (double)PageSize);
+            Search = search;
+            SortBy = sortBy;
+            TotalPages = totalPages;
+            Count = count;
+            Items = items;
+            return this; 
 
-            AddRange(items);
         }
 
-        public static PaginatedList<T> Create(IQueryable<T> source,OwnerStringParameter ownerStringParameter)
+    }
+    public static class PaginationHelper {
+        public static PaginatedList<T> Create<T>(IQueryable<T> source, PaginatedViewModel paginatedViewModel)
         {
             var count = source.Count();
-            var items = source.Skip((ownerStringParameter.PageNumber - 1) 
-                * ownerStringParameter.PageSize).Take(ownerStringParameter.PageSize).ToList();
-            return new PaginatedList<T>
-                (items, 
-                 count,
-                ownerStringParameter.PageNumber,
-                ownerStringParameter.PageSize, 
-                ownerStringParameter.search, 
-                ownerStringParameter.SortBy);
+            var totalPages = (int)Math.Ceiling(count / (double)paginatedViewModel.PageSize);
+            var items = source.Skip((paginatedViewModel.PageNumber - 1) * paginatedViewModel.PageSize)
+                .Take(paginatedViewModel.PageSize).ToList();
+            var paginatedResult = new PaginatedList<T>();
+            paginatedResult.SetValues(items,
+           paginatedViewModel.PageNumber,
+           paginatedViewModel.PageSize,
+                paginatedViewModel.search,
+                paginatedViewModel.SortBy,
+               totalPages,count);
+            
+            return paginatedResult;
         }
     }
 

@@ -7,11 +7,15 @@ using webapinews.Models;
 using webapinews.Reporistory;
 using webapinews.Services;
 using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.Filters;
-using Microsoft.AspNetCore.Builder;
 using webapinews.Entities;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using MediatR;
+using System.Reflection;
+using webapinews.Command.User_Commands;
+using webapinews.Mappers.UserMapper;
+using webapinews.Qurey.User_Qurey;
+using webapinews.Handler.User_Handler;
+using Microsoft.AspNetCore.Hosting;
 //using webapinews.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,9 +28,10 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddControllersWithViews()
     .AddNewtonsoftJson(options =>
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
-);
-builder.Services.AddCors();
-builder.Services.AddControllers().AddJsonOptions(x =>
+    );
+    builder.Services.AddAutoMapper(typeof(Program).Assembly);
+    builder.Services.AddCors();
+    builder.Services.AddControllers().AddJsonOptions(x =>
 {
         // serialize enums as strings in api responses (e.g. Role)
     x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
@@ -37,17 +42,21 @@ builder.Services.AddControllers().AddJsonOptions(x =>
 
     // configure DI for application services
     builder.Services.AddScoped<IJwtAuth, JwtAuth>();
+   
     builder.Services.AddScoped<IUserReporistory, UserReporistory>();
     builder.Services.AddMediatR(typeof(UserReporistory).Assembly);
+
     builder.Services.AddScoped<INewsReporistory, NewsReporistory>();
-    builder.Services.AddMediatR(typeof(NewsReporistory).Assembly);
     builder.Services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
     builder.Services.AddScoped(typeof(IIdentityService), typeof(IdentityServices));
-
-
     builder.Services.AddScoped<IBookMarkReporistory, BookMarkReporistory>();
-    builder.Services.AddMediatR(typeof(BookMarkReporistory).Assembly);
+    services.AddMediatR(typeof(Program).GetTypeInfo().Assembly);
+    builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+
 }
+
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(option =>

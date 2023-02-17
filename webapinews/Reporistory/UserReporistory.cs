@@ -21,7 +21,7 @@ namespace webapinews.Services
             _appSettings = appSettings.Value;
         }
 
-        public UserDataResponse Authenticate(UserDataRequest model)
+        public UserInputResponse Authenticate(UserInputModel model)
         {
             var user = _context.Users.SingleOrDefault(x => x.UserName == model.Username && x.Password == model.Password);
 
@@ -32,7 +32,7 @@ namespace webapinews.Services
             // authentication successful
             var jwtToken = _jwtUtils.GenerateJwtToken(user);
 
-            return new UserDataResponse(user, jwtToken);
+            return new UserInputResponse(user, jwtToken);
             
         }
 
@@ -41,16 +41,16 @@ namespace webapinews.Services
             var user = _context.Users;
             return user.ToList();
         }       
-        public PaginatedList<User> Get(OwnerStringParameter ownerStringParameter)
+        public PaginatedList<User> Get(PaginatedViewModel paginatedViewModel)
         {
             var model = _context.Users.AsQueryable();
-            if (!string.IsNullOrEmpty(ownerStringParameter.search))
+            if (!string.IsNullOrEmpty(paginatedViewModel.search))
             {
-                model = model.Where(hh => hh.UserName.Contains(ownerStringParameter.search));
+                model = model.Where(hh => hh.UserName.Contains(paginatedViewModel.search));
             }
-            if (!string.IsNullOrEmpty(ownerStringParameter.SortBy))
+            if (!string.IsNullOrEmpty(paginatedViewModel.SortBy))
             {
-                switch (ownerStringParameter.SortBy)
+                switch (paginatedViewModel.SortBy)
                 {
                     case "user_desc": model = model.OrderByDescending(hh => hh.UserName); break;
                     case "Id_asc": model = model.OrderBy(hh => hh.Id); break;
@@ -59,7 +59,7 @@ namespace webapinews.Services
                     case "email_desc": model = model.OrderByDescending(hh => hh.Email); break;
                 }
             }
-            var result = PaginatedList<User>.Create(model, ownerStringParameter);
+            var result = PaginationHelper.Create(model, paginatedViewModel);
             return result;
         }
         public User GetById(int id)
@@ -73,12 +73,6 @@ namespace webapinews.Services
         {
             if (_context.Users.Any(x => x.UserName == model.UserName))
                 throw new AppException("Username '" + model.UserName + "' is already taken");
-
-            model.Id = model.Id;
-            model.UserName = model.UserName;
-           model.Email = model.Email;
-            model.Password = model.Password;
-            //model.Role = model.Role;
             _context.Users.Add(model);
             _context.SaveChanges();
             return model;
@@ -97,7 +91,6 @@ namespace webapinews.Services
             user.UserName = model.UserName;
             user.Email = model.Email;
             user.Password = model.Password;
-            user.Role = model.Role;
             _context.Users.Update(user);
             _context.SaveChanges();
             return user;

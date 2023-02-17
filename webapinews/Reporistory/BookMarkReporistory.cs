@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using webapinews.Entities;
 using webapinews.Helpers;
 using webapinews.Interface;
+using webapinews.Mappers.BookMarkMapper;
 using webapinews.Models;
 
 namespace webapinews.Reporistory
@@ -18,18 +18,13 @@ namespace webapinews.Reporistory
             _jwtUtils = jwtutils;
 
         }
-        public BookMark Delete(int id, int userId)
+        public string Delete(int id, int userId)
         {
-            var user = _context.BookMarks.Where(x => x.UserId == userId && x.NewsId == id).FirstOrDefault();
-
-            if (user is null)
-            {
-                return null;
-            }
-
-            _context.BookMarks.Remove(user);
+          
+            var bookmarks = _context.BookMarks.Where(b => b.UserId == userId).FirstOrDefault();
+            _context.BookMarks.Remove(bookmarks);
             _context.SaveChanges();
-            return user;
+            return "BookMarked News Deleted";
         }
         public List<BookMark> BookMarkNews(int newsId, int userId)
         {
@@ -78,7 +73,7 @@ namespace webapinews.Reporistory
             });
             return mappedData.ToList();
         }
-        public PaginatedList<BookMarksViewModel> GetBookMarkedById(int id, OwnerStringParameter ownerStringParameter)
+        public PaginatedList<BookMarksViewModel> GetBookMarkedById(int id, PaginatedViewModel paginatedViewModel)
         {
 
             var user = _context.BookMarks.Include(e => e.User)
@@ -96,13 +91,13 @@ namespace webapinews.Reporistory
                 CreationDate = e.News.CreationDate,
                 IsBookMark = e.IsBookMark
             });
-            if (!string.IsNullOrEmpty(ownerStringParameter.search))
+            if (!string.IsNullOrEmpty(paginatedViewModel.search))
             {
-                mappedData = mappedData.Where(hh => hh.userName.Contains(ownerStringParameter.search));
+                mappedData = mappedData.Where(hh => hh.userName.Contains(paginatedViewModel.search));
             }
-            if (!string.IsNullOrEmpty(ownerStringParameter.SortBy))
+            if (!string.IsNullOrEmpty(paginatedViewModel.SortBy))
             {
-                switch (ownerStringParameter.SortBy)
+                switch (paginatedViewModel.SortBy)
                 {
                     case "user_desc": mappedData = mappedData.OrderByDescending(hh => hh.userName); break;
                     case "Id_asc": mappedData = mappedData.OrderBy(hh => hh.NewsId); break;
@@ -111,7 +106,7 @@ namespace webapinews.Reporistory
                     case "email_desc": mappedData = mappedData.OrderByDescending(hh => hh.Email); break;
                 }
             }
-            var result = PaginatedList<BookMarksViewModel>.Create(mappedData, ownerStringParameter);
+            var result = PaginationHelper.Create(mappedData, paginatedViewModel);
             return result;
 
         }

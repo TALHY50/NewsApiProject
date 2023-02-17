@@ -7,9 +7,9 @@ namespace webapinews.Interface
 {
     public interface IUserReporistory 
     {
-        UserDataResponse Authenticate(UserDataRequest model);
+        UserInputResponse Authenticate(UserInputModel model);
         List<User> GetAll();
-        PaginatedList<User> Get(OwnerStringParameter ownerStringParameter);
+        PaginatedList<User> Get(PaginatedViewModel paginatedViewModel);
         User GetById(int id);
         User Register(User model);
         User Update(User model);
