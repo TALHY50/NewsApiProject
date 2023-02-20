@@ -8,6 +8,7 @@
 
         public string Content { get; set; } = null!;
 
-        public DateTime CreationDate { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public DateTime ModifiedDate { get; set; }
     }
 }

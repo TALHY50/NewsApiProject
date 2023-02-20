@@ -47,7 +47,7 @@ namespace webapinews.Controllers
         }
 
         [Authorize(Role.Admin, Role.User)]
-        [HttpGet("Id")]
+        [HttpGet("{id:int}")]
 
         public async Task<ActionResult<NewsViewModel>> GetById(int id)
         {

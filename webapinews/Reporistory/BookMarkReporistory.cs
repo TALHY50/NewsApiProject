@@ -9,10 +9,10 @@ namespace webapinews.Reporistory
     public class BookMarkReporistory : IBookMarkReporistory
     {
 
-        private readonly NewsApiContext _context;
+        private readonly NewsApiCodeContext _context;
         private IJwtAuth _jwtUtils;
         int _nextId = 0;
-        public BookMarkReporistory(NewsApiContext context, IJwtAuth jwtutils)
+        public BookMarkReporistory(NewsApiCodeContext context, IJwtAuth jwtutils)
         {
             _context = context;
             _jwtUtils = jwtutils;
@@ -33,7 +33,7 @@ namespace webapinews.Reporistory
             if (existingBookmark != null)
             {
                 existingBookmark.IsBookMark = !existingBookmark.IsBookMark;
-                existingBookmark.CreationDate = DateTime.Now;
+                //existingBookmark.CreationDate = DateTime.Now;
             }
             else
             {
@@ -42,7 +42,7 @@ namespace webapinews.Reporistory
                     Id = _nextId++,
                     NewsId = newsId,
                     UserId = userId,
-                    CreationDate = DateTime.Now,
+                    //CreationDate = DateTime.Now,
                     IsBookMark = true
                 };
 
@@ -68,7 +68,7 @@ namespace webapinews.Reporistory
                 Aurthor = e.News.Aurthor,
                 Title = e.News.Title,
                 Content = e.News.Content,
-                CreationDate = e.News.CreationDate,
+                //CreationDate = e.News.CreationDate,
                 IsBookMark = e.IsBookMark
             });
             return mappedData.ToList();
@@ -88,7 +88,7 @@ namespace webapinews.Reporistory
                 Aurthor = e.News.Aurthor,
                 Title = e.News.Title,
                 Content = e.News.Content,
-                CreationDate = e.News.CreationDate,
+                //CreationDate = e.News.CreationDate,
                 IsBookMark = e.IsBookMark
             });
             if (!string.IsNullOrEmpty(paginatedViewModel.search))

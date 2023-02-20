@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using webapinews.Command.User_Commands;
@@ -32,14 +33,14 @@ namespace webapinews.Controllers
         [HttpPost("Login")]
         public async Task<ActionResult<UserInputResponse>> Login(UserInputModel model)
         {
-            if(model == null )
+            if (model == null)
             {
                 return NotFound(new { message = "NO User Found" });
             }
             var response = await _mediator.Send(new loginCommand(model));
             return Ok(response);
         }
-        [Authorize(Role.Admin, Role.User)]
+        [AllowAnonymous]
         [HttpPost("Registor")]
         public async Task<ActionResult<RegistorUserViewModel>> Registor(RegistorUserCommand model)
         {
@@ -47,14 +48,14 @@ namespace webapinews.Controllers
             {
                 return Ok(new { message = "Invalid Credential" });
             }
-           
-            return Ok (await _mediator.Send(model));
+
+            return Ok(await _mediator.Send(model));
         }
         [Authorize(Role.Admin)]
         [HttpGet]
         public async Task<ActionResult<UserViewModel>> Get()
         {
-            var users = await _mediator.Send(new  GetUserListQuery());
+            var users = await _mediator.Send(new GetUserListQuery());
             return Ok(users);
         }
         [Authorize(Role.Admin)]
@@ -65,17 +66,16 @@ namespace webapinews.Controllers
             {
                 return NotFound("No Data found");
             }
-            
+
             return Ok(await _mediator.Send(new GetUserPagenatedQuery(paginatedViewModel)));
 
         }
-        [Authorize(Role.Admin)]
-        [HttpGet("Id")]
-        public async Task<ActionResult<UserViewModel>> GetById([FromQuery] GetUserByIdQuery model)
-        {  
-            if (model == null)
-                return Unauthorized(new { message = "Unauthorized" });
-            var user = await _mediator.Send(model);
+        //[Authorize(Role.Admin)]
+        [AllowAnonymous]
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<UserViewModel>> GetById(int id)
+        {
+            var user = await _mediator.Send(new GetUserByIdQuery(id));
             return Ok(user);
         }
         [Authorize(Role.Admin)]
@@ -87,11 +87,11 @@ namespace webapinews.Controllers
                 return Ok(new { message = "User Id not Found" });
             }
             model.Id = Id;
-      
+
             return Ok(await _mediator.Send(model));
         }
         [Authorize(Role.Admin)]
-        [HttpDelete("[action]")]
+        [HttpDelete("{id:int}")]
         public async Task<ActionResult<UserViewModel>> Delete(int id) {
             var currentUser = _identityService.GetUserId();
             if (id != currentUser)

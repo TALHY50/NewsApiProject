@@ -13,9 +13,9 @@ namespace webapinews.Reporistory
     public class NewsReporistory : INewsReporistory
     {
 
-        private NewsApiContext _context;
+        private NewsApiCodeContext _context;
 
-        public NewsReporistory(NewsApiContext context)
+        public NewsReporistory(NewsApiCodeContext context)
         {
             _context = context;
             
@@ -41,8 +41,8 @@ namespace webapinews.Reporistory
                     case "title_desc": qurey = qurey.OrderByDescending(hh => hh.Title); break;
                     case "aurthor_asc": qurey = qurey.OrderBy(hh => hh.Aurthor); break;
                     case "aurthor_desc": qurey = qurey.OrderByDescending(hh => hh.Aurthor); break;
-                    case "date_asc": qurey = qurey.OrderBy(hh => hh.CreationDate); break;
-                    case "date_desc": qurey = qurey.OrderByDescending(hh => hh.CreationDate); break;
+                    //case "date_asc": qurey = qurey.OrderBy(hh => hh.CreationDate); break;
+                    //case "date_desc": qurey = qurey.OrderByDescending(hh => hh.CreationDate); break;
                 }
             }
 

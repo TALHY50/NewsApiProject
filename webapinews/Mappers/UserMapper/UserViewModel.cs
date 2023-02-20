@@ -13,5 +13,7 @@ namespace webapinews.Mappers.UserMapper
         public string Password { get; set; } = null!;
 
         public Role Role { get; set; }
+         public DateTime CreatedDate { get; set; } 
+        public DateTime ModifiedDate { get; set; }
     }
 }

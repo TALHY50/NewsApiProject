@@ -11,7 +11,8 @@
         public string Aurthor { get; set; }
         public string Title { get; set; }
         public string Content { get; set; }
-        public DateTime CreationDate { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public DateTime ModifiedDate { get; set; }
         public bool IsBookMark { get; set; }
 
     }

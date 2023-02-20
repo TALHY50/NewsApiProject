@@ -4,17 +4,19 @@ using webapinews.Interface;
 using webapinews.Entities;
 using webapinews.ExceptionHandler;
 using webapinews.Helpers;
+using NuGet.Versioning;
+using Microsoft.EntityFrameworkCore;
 
 namespace webapinews.Services
 {
     public class UserReporistory : IUserReporistory
     {
-        private NewsApiContext _context;
+        private NewsApiCodeContext _context;
         private IJwtAuth _jwtUtils;
         private readonly AppSettings _appSettings;
        
 
-        public UserReporistory(NewsApiContext context, IJwtAuth jwtUtils, IOptions<AppSettings> appSettings)
+        public UserReporistory(NewsApiCodeContext context, IJwtAuth jwtUtils, IOptions<AppSettings> appSettings)
         {
             _context = context;
             _jwtUtils = jwtUtils;
@@ -80,13 +82,12 @@ namespace webapinews.Services
 
         public User Update(User model)
         {
-
             var user = _context.Users.Where(s => s.Id == model.Id).FirstOrDefault();
             if (user == null)
             {
 
                 return null;
-            } 
+            }
             user.Id = model.Id;
             user.UserName = model.UserName;
             user.Email = model.Email;

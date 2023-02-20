@@ -23,8 +23,8 @@ var builder = WebApplication.CreateBuilder(args);
     var services = builder.Services;
     var env = builder.Environment;
     // Add services to the container.
-    builder.Services.AddDbContext<NewsApiContext>(opt =>
-    opt.UseSqlServer("NewAPI"));
+    builder.Services.AddDbContext<NewsApiCodeContext>(options =>
+            options.UseSqlServer("Server=DESKTOP-JVIBG7N;Database=NewsApiCodeFirst;Encrypt=False;Trusted_Connection=True; User ID=sa;Password=1122"));
     builder.Services.AddControllersWithViews()
     .AddNewtonsoftJson(options =>
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
