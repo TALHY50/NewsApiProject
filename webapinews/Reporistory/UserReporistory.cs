@@ -6,6 +6,7 @@ using webapinews.ExceptionHandler;
 using webapinews.Helpers;
 using NuGet.Versioning;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace webapinews.Services
 {
@@ -14,7 +15,7 @@ namespace webapinews.Services
         private NewsApiCodeContext _context;
         private IJwtAuth _jwtUtils;
         private readonly AppSettings _appSettings;
-       
+
 
         public UserReporistory(NewsApiCodeContext context, IJwtAuth jwtUtils, IOptions<AppSettings> appSettings)
         {
@@ -35,14 +36,14 @@ namespace webapinews.Services
             var jwtToken = _jwtUtils.GenerateJwtToken(user);
 
             return new UserInputResponse(user, jwtToken);
-            
+
         }
 
         public List<User> GetAll()
         {
             var user = _context.Users;
             return user.ToList();
-        }       
+        }
         public PaginatedList<User> Get(PaginatedViewModel paginatedViewModel)
         {
             var model = _context.Users.AsQueryable();
@@ -111,3 +112,4 @@ namespace webapinews.Services
 
     }
 }
+

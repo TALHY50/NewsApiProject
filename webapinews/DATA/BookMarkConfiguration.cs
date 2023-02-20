@@ -8,7 +8,7 @@ namespace webapinews.DATA
     {
         public void Configure(EntityTypeBuilder<BookMark> builder)
         {
-
+            //HasOne(b => b.book).WithOne(c => c.BankAccount).HasForeignKey<BookMark>(f => f.userId);
         }
     }
     

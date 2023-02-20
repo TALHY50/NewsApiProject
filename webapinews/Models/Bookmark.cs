@@ -6,7 +6,7 @@ namespace webapinews.Models;
 
 public partial class BookMark : TrackableBaseEntity
 {
-   
+
     public int Id { get; set; }
 
     public int UserId { get; set; }

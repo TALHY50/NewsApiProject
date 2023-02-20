@@ -16,6 +16,7 @@ using webapinews.Mappers.UserMapper;
 using webapinews.Qurey.User_Qurey;
 using webapinews.Handler.User_Handler;
 using Microsoft.AspNetCore.Hosting;
+using webapinews.Controllers;
 //using webapinews.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -104,4 +105,5 @@ app.UseMiddleware<ErrorHandlerMiddleware>();
 // custom jwt auth middleware
 app.UseMiddleware<JwtMiddleware>();
 app.MapControllers();
+
 app.Run();
