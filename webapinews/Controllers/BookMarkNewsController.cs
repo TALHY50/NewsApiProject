@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using webapinews.Command.BookMark_Commands;
 using webapinews.Entities;
 using webapinews.Helpers;
+using webapinews.Helpers.Paging;
 using webapinews.Interface;
 using webapinews.Mappers.BookMarkMapper;
 using webapinews.Mappers.News_Mapper;
@@ -48,7 +49,7 @@ namespace webapinews.Controllers
         //[Authorize(Role.Admin, Role.User)]
         [AllowAnonymous]
         [HttpGet("Paginated")]
-        public async Task<ActionResult<PaginatedList<News>>> GetPaginated([FromQuery] PaginatedViewModel paginatedViewModel)
+        public async Task<ActionResult<PaginatedList<NewsViewModel>>> GetPaginated([FromQuery] PaginatedViewModel paginatedViewModel)
         {
             if (_mediator == null)
             {
@@ -61,8 +62,8 @@ namespace webapinews.Controllers
         }
 
         [Authorize(Role.Admin , Role.User)]
-        [HttpGet("ActiveUser")]
-        public async Task<ActionResult<List<BookMarksViewModel>>> GETActiveUser()
+        [HttpGet("BookMarkedNews")]
+        public async Task<ActionResult<List<BookMarksViewModel>>> GET()
         {
             var currentUser = _identityService.GetUserId();
             if (currentUser == null)
@@ -73,8 +74,8 @@ namespace webapinews.Controllers
             return Ok(user);
         }
         [Authorize(Role.Admin, Role.User)]
-        [HttpGet("ActiveUser/Paginated")]
-        public async Task<ActionResult<PaginatedList<BookMarksViewModel>>> GetPaginatedActiveUser([FromQuery] PaginatedViewModel paginatedViewModel)
+        [HttpGet("Pagination")]
+        public async Task<ActionResult<PaginatedList<BookMarksViewModel>>> GetPagination([FromQuery] PaginatedViewModel paginatedViewModel)
         {
             var currentUser = _identityService.GetUserId();
             if (currentUser == null)

@@ -17,6 +17,7 @@ using webapinews.Qurey.User_Qurey;
 using webapinews.Handler.User_Handler;
 using Microsoft.AspNetCore.Hosting;
 using webapinews.Controllers;
+using webapinews.Helpers;
 //using webapinews.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -53,6 +54,9 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddScoped<IBookMarkReporistory, BookMarkReporistory>();
     services.AddMediatR(typeof(Program).GetTypeInfo().Assembly);
     builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+    builder.Services.AddScoped<IHelper<News>, Helper<News>>();
+    builder.Services.AddScoped<IHelper<User>, Helper<User>>();
+    builder.Services.AddScoped<IHelper<BookMark>, Helper<BookMark>>();
 
 
 }

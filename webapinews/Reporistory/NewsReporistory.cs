@@ -4,14 +4,21 @@ using Microsoft.EntityFrameworkCore;
 using System.Drawing.Printing;
 using System.Globalization;
 using webapinews.Entities;
+using webapinews.FilterandSorting;
 using webapinews.Helpers;
+using webapinews.Helpers.Paging;
 using webapinews.Interface;
 using webapinews.Models;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace webapinews.Reporistory
 {
     public class NewsReporistory : INewsReporistory
     {
+        //PaginatedList<News> _paginationResult = new PaginatedList<News>;
+        //Filtering _filtering = new Filtering();
+        //Sorting<News> _sorting = new Sorting<News>();
+
 
         private NewsApiCodeContext _context;
 
@@ -28,25 +35,11 @@ namespace webapinews.Reporistory
         }
         public PaginatedList<News> Get(PaginatedViewModel paginatedViewModel)
         {
-            var qurey = _context.News.AsQueryable();
-            if (!string.IsNullOrEmpty(paginatedViewModel.search))
-            {
-                qurey = qurey.Where(hh => hh.Title.Contains(paginatedViewModel.search));
-            }
-            qurey = qurey.OrderBy(hh => hh.Aurthor);
-            if (!string.IsNullOrEmpty(paginatedViewModel.SortBy))
-            {
-                switch (paginatedViewModel.SortBy)
-                {
-                    case "title_desc": qurey = qurey.OrderByDescending(hh => hh.Title); break;
-                    case "aurthor_asc": qurey = qurey.OrderBy(hh => hh.Aurthor); break;
-                    case "aurthor_desc": qurey = qurey.OrderByDescending(hh => hh.Aurthor); break;
-                    //case "date_asc": qurey = qurey.OrderBy(hh => hh.CreationDate); break;
-                    //case "date_desc": qurey = qurey.OrderByDescending(hh => hh.CreationDate); break;
-                }
-            }
-
-            var result = PaginationHelper.Create(qurey, paginatedViewModel);
+            var query = _context.News.AsQueryable();
+            var filter = Filtering.Filter<News>(paginatedViewModel.columnName, paginatedViewModel.search, query);
+            var sort = Sorting<News>.Sort(paginatedViewModel.SortBy, paginatedViewModel.columnName, filter.AsQueryable());
+            var result = PaginationHelper.Create(sort.AsQueryable(),paginatedViewModel);
+            _context.SaveChanges();
             return result;
         }
         public News Add(News news)

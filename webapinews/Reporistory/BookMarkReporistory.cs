@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using webapinews.FilterandSorting;
 using webapinews.Helpers;
+using webapinews.Helpers.Paging;
 using webapinews.Interface;
 using webapinews.Mappers.BookMarkMapper;
 using webapinews.Models;
@@ -39,7 +41,7 @@ namespace webapinews.Reporistory
             {
                 BookMark newBookmark = new BookMark
                 {
-                    Id = _nextId++,
+                   Id = _nextId++,
                     NewsId = newsId,
                     UserId = userId,
                     //CreationDate = DateTime.Now,
@@ -88,26 +90,15 @@ namespace webapinews.Reporistory
                 Aurthor = e.News.Aurthor,
                 Title = e.News.Title,
                 Content = e.News.Content,
-                //CreationDate = e.News.CreationDate,
+                
                 IsBookMark = e.IsBookMark
             });
-            if (!string.IsNullOrEmpty(paginatedViewModel.search))
-            {
-                mappedData = mappedData.Where(hh => hh.userName.Contains(paginatedViewModel.search));
-            }
-            if (!string.IsNullOrEmpty(paginatedViewModel.SortBy))
-            {
-                switch (paginatedViewModel.SortBy)
-                {
-                    case "user_desc": mappedData = mappedData.OrderByDescending(hh => hh.userName); break;
-                    case "Id_asc": mappedData = mappedData.OrderBy(hh => hh.NewsId); break;
-                    case "Id_desc": mappedData = mappedData.OrderByDescending(hh => hh.NewsId); break;
-                    case "email_asc": mappedData = mappedData.OrderBy(hh => hh.Email); break;
-                    case "email_desc": mappedData = mappedData.OrderByDescending(hh => hh.Email); break;
-                }
-            }
-            var result = PaginationHelper.Create(mappedData, paginatedViewModel);
+            var filter = Filtering.Filter<BookMarksViewModel>(paginatedViewModel.columnName, paginatedViewModel.search, mappedData);
+            var sort = Sorting<BookMarksViewModel>.Sort(paginatedViewModel.SortBy, paginatedViewModel.columnName, filter.AsQueryable());
+            var result = PaginationHelper.Create(sort.AsQueryable(), paginatedViewModel);
+            _context.SaveChanges();
             return result;
+            
 
         }
 

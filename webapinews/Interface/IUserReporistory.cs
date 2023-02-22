@@ -1,5 +1,6 @@
 ﻿using webapinews.Entities;
 using webapinews.Helpers;
+using webapinews.Helpers.Paging;
 using webapinews.Models;
 using webapinews.Reporistory;
 
@@ -7,7 +8,7 @@ namespace webapinews.Interface
 {
     public interface IUserReporistory 
     {
-        UserInputResponse Authenticate(UserInputModel model);
+        User Authenticate(UserInputModel model);
         List<User> GetAll();
         PaginatedList<User> Get(PaginatedViewModel paginatedViewModel);
         User GetById(int id);

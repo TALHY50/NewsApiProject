@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using MediatR;
 using webapinews.Helpers;
+using webapinews.Helpers.Paging;
 using webapinews.Interface;
 using webapinews.Mappers.News_Mapper;
 using webapinews.Mappers.NewsMapper;
@@ -16,6 +17,7 @@ namespace webapinews.Handler.News_Handler
     {
         private readonly INewsReporistory _newsReporistory;
         private readonly IMapper _mapper;
+
         public GetNewsPagenatedHandler(INewsReporistory newsReporistory, IMapper mapper)
         {
             _newsReporistory = newsReporistory;

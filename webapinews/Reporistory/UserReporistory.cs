@@ -7,6 +7,8 @@ using webapinews.Helpers;
 using NuGet.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http.HttpResults;
+using webapinews.Helpers.Paging;
+using webapinews.FilterandSorting;
 
 namespace webapinews.Services
 {
@@ -24,7 +26,7 @@ namespace webapinews.Services
             _appSettings = appSettings.Value;
         }
 
-        public UserInputResponse Authenticate(UserInputModel model)
+        public User Authenticate(UserInputModel model)
         {
             var user = _context.Users.SingleOrDefault(x => x.UserName == model.Username && x.Password == model.Password);
 
@@ -32,11 +34,7 @@ namespace webapinews.Services
             if (user == null)
                 throw new AppException("Username or password is incorrect");
 
-            // authentication successful
-            var jwtToken = _jwtUtils.GenerateJwtToken(user);
-
-            return new UserInputResponse(user, jwtToken);
-
+            return user;
         }
 
         public List<User> GetAll()
@@ -47,22 +45,10 @@ namespace webapinews.Services
         public PaginatedList<User> Get(PaginatedViewModel paginatedViewModel)
         {
             var model = _context.Users.AsQueryable();
-            if (!string.IsNullOrEmpty(paginatedViewModel.search))
-            {
-                model = model.Where(hh => hh.UserName.Contains(paginatedViewModel.search));
-            }
-            if (!string.IsNullOrEmpty(paginatedViewModel.SortBy))
-            {
-                switch (paginatedViewModel.SortBy)
-                {
-                    case "user_desc": model = model.OrderByDescending(hh => hh.UserName); break;
-                    case "Id_asc": model = model.OrderBy(hh => hh.Id); break;
-                    case "Id_desc": model = model.OrderByDescending(hh => hh.Id); break;
-                    case "email_asc": model = model.OrderBy(hh => hh.Email); break;
-                    case "email_desc": model = model.OrderByDescending(hh => hh.Email); break;
-                }
-            }
-            var result = PaginationHelper.Create(model, paginatedViewModel);
+            var filter = Filtering.Filter<User>(paginatedViewModel.columnName, paginatedViewModel.search, model);
+            var sort = Sorting<User>.Sort(paginatedViewModel.SortBy, paginatedViewModel.columnName, filter.AsQueryable());
+            var result = PaginationHelper.Create(sort.AsQueryable(), paginatedViewModel);
+            _context.SaveChanges();
             return result;
         }
         public User GetById(int id)

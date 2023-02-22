@@ -2,7 +2,8 @@
 using webapinews.Command.BookMark_Commands;
 using webapinews.Command.News_Commands;
 using webapinews.Command.User_Commands;
-using webapinews.Helpers;
+using webapinews.Entities;
+using webapinews.Helpers.Paging;
 using webapinews.Mappers.BookMarkMapper;
 using webapinews.Mappers.News_Mapper;
 using webapinews.Mappers.NewsMapper;
@@ -22,6 +23,7 @@ namespace webapinews.Mappers.Profiler
             CreateMap<User, RegistorUserViewModel>();
             CreateMap<UpdateUserCommand, User>();
             CreateMap<User, UpdateUserViewModel>();
+            CreateMap<User, UserInputResponse>();
 
 
             CreateMap<News, NewsViewModel>();

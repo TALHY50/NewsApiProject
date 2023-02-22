@@ -1,5 +1,6 @@
 ﻿using webapinews.Entities;
 using webapinews.Helpers;
+using webapinews.Helpers.Paging;
 using webapinews.Models;
 
 namespace webapinews.Interface

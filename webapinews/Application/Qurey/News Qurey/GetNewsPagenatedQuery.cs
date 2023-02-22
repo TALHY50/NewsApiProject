@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using webapinews.Helpers;
+using webapinews.Helpers.Paging;
 using webapinews.Mappers.News_Mapper;
 using webapinews.Mappers.NewsMapper;
 using webapinews.Models;

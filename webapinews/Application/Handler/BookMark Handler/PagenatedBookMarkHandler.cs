@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using webapinews.Helpers;
+using webapinews.Helpers.Paging;
 using webapinews.Interface;
 using webapinews.Mappers.BookMarkMapper;
 using webapinews.Models;
